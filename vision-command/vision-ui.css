@@ -1,0 +1,75 @@
+#vc-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 240px;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+#vc-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 240px;
+  z-index: 1000;
+  pointer-events: none;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: none;
+  background: transparent;
+}
+
+.vc-cursor {
+  --vc-progress: 0%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: rgba(250, 204, 21, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 18px rgba(250, 204, 21, 0.9), 0 0 32px rgba(250, 204, 21, 0.45);
+  pointer-events: none;
+  z-index: 1200;
+  transform: translate3d(0, 0, 0);
+  transition: transform 80ms linear, box-shadow 0.18s ease;
+}
+
+.vc-cursor::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(253, 224, 71, 1) var(--vc-progress), rgba(253, 224, 71, 0.18) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  animation: vc-cursor-spin 1s linear infinite;
+}
+
+.vc-cursor-active {
+  box-shadow: 0 0 22px rgba(250, 204, 21, 1), 0 0 38px rgba(250, 204, 21, 0.8);
+}
+
+@keyframes vc-cursor-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vc-hover-target {
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
+}

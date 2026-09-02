@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITADEL | NGO Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="glass-panel border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center shadow-md sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-black tracking-widest text-slate-900 dark:text-white uppercase drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">NGO Hub</h1>
+            <span class="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-mono px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800 shadow-[0_0_10px_rgba(59,130,246,0.2)]">CITIZEN ACCESS</span>
+        </div>
+        <a href="dash-citizen.html" class="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest rounded transition-all btn-glow shadow-md">Back to Dash</a>
+    </header>
+
+    <main class="flex-1 p-6 overflow-y-auto max-w-7xl w-full mx-auto space-y-6">
+        <div class="border-b border-slate-300 dark:border-slate-800 pb-2 mb-6">
+            <h2 class="text-2xl font-black uppercase tracking-tight">Available Campaigns</h2>
+            <p class="text-xs text-slate-500 font-mono mt-1">Select an NGO to volunteer your services.</p>
+        </div>
+       
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- NGO Card 1 -->
+            <div class="glass-panel rounded-xl p-5 shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Green Earth Init</h3>
+                    <p class="text-xs text-slate-500 mb-4">Focus on urban forestry, tree planting, and local park cleanups.</p>
+                </div>
+                <button data-ngo="Green Earth Init" class="join-btn w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded uppercase tracking-widest transition-all btn-glow glow-emerald">Request to Join</button>
+            </div>
+
+            <!-- NGO Card 2 -->
+            <div class="glass-panel rounded-xl p-5 shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Urban Builders</h3>
+                    <p class="text-xs text-slate-500 mb-4">Community infrastructure and minor public property repair assistance.</p>
+                </div>
+                <button data-ngo="Urban Builders" class="join-btn w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded uppercase tracking-widest transition-all btn-glow glow-emerald">Request to Join</button>
+            </div>
+
+            <!-- NGO Card 3 -->
+            <div class="glass-panel rounded-xl p-5 shadow-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Civic Educators</h3>
+                    <p class="text-xs text-slate-500 mb-4">Teaching digital literacy and guiding citizens on portal usage.</p>
+                </div>
+                <button data-ngo="Civic Educators" class="join-btn w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded uppercase tracking-widest transition-all btn-glow glow-emerald">Request to Join</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Your exact Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7UBfwYAz5gIdXRGcs5Jl0WP6pPm9RXKM",
+            authDomain: "citadel-gov.firebaseapp.com",
+            projectId: "citadel-gov",
+            storageBucket: "citadel-gov.firebasestorage.app",
+            messagingSenderId: "312225425822",
+            appId: "1:312225425822:web:cccf5db07b42f7d0210e8f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Event Listener for dynamically handling the "Request to Join" buttons
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('join-btn')) {
+                const btn = e.target;
+                const ngoName = btn.getAttribute('data-ngo');
+                const citizenName = sessionStorage.getItem('citadel_user_name') || 'Authorized Citizen';
+               
+                // Visual Loading State
+                btn.innerText = "SENDING...";
+                btn.classList.add('animate-pulse', 'opacity-70', 'cursor-not-allowed');
+               
+                try {
+                    // Send to Firebase
+                    await addDoc(collection(db, "volunteer_requests"), {
+                        citizenName: citizenName,
+                        ngoName: ngoName,
+                        status: 'PENDING',
+                        timestamp: serverTimestamp()
+                    });
+                   
+                    // Success State
+                    btn.classList.remove('animate-pulse', 'opacity-70', 'bg-emerald-600', 'hover:bg-emerald-500', 'text-white', 'btn-glow', 'glow-emerald');
+                    btn.classList.add('bg-slate-200', 'dark:bg-slate-800', 'text-slate-500', 'dark:text-slate-400', 'border', 'border-slate-300', 'dark:border-slate-700');
+                    btn.innerText = "PENDING APPROVAL";
+                    btn.disabled = true;
+                } catch(error) {
+                    console.error("Firebase Error:", error);
+                    alert("Network Error: Could not reach Citadel Core.");
+                    btn.innerText = "RETRY REQUEST";
+                    btn.classList.remove('animate-pulse', 'opacity-70', 'cursor-not-allowed');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITADEL | Official Command</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./vision-command/vision-ui.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-theme matrix-bg">
+
+    <header class="glass-panel border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center shadow-md sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-black tracking-widest text-slate-900 dark:text-white uppercase drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">Gov. Command Node</h1>
+            <span class="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-mono px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800 shadow-[0_0_10px_rgba(59,130,246,0.2)]">OFFICIAL ACCESS</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="toggleTheme()" class="p-2 bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors shadow-inner">
+                <svg id="icon-sun" class="w-5 h-5 hidden text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
+                <svg id="icon-moon" class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            </button>
+            <button id="vc-toggle" type="button" class="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-black uppercase tracking-widest rounded transition-all btn-glow glow-cyan shadow-lg border border-cyan-500/50">Vision Command</button>
+            <a href="index.html" class="px-4 py-2 bg-red-100 dark:bg-red-600/10 text-red-600 dark:text-red-500 text-[10px] font-black uppercase tracking-widest rounded transition-all btn-glow glow-red border border-transparent dark:border-red-900/50">Sign Out</a>
+        </div>
+    </header>
+
+    <main class="flex-1 p-6 overflow-y-auto max-w-7xl w-full mx-auto space-y-10">
+        <div class="glass-panel rounded-xl p-4 border border-cyan-300/60 dark:border-cyan-800/60 bg-cyan-50/80 dark:bg-cyan-950/20 text-sm text-slate-700 dark:text-slate-200">
+            <span class="font-black uppercase tracking-widest text-[10px] text-cyan-600 dark:text-cyan-400">Vision command</span>
+            <p class="mt-2 leading-relaxed">Point with your index finger over the dashboard and hold for 2 seconds to activate the button beneath it. The whole dashboard is live, so you can hover across cards and actions without tiny target locking.</p>
+        </div>
+
+        <section class="animate-enter">
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">Gov response board</p>
+                    <h2 class="text-2xl font-black uppercase tracking-tight">Streamlined Data</h2>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <button type="button" class="gov-need-card group rounded-2xl p-4 text-left border border-cyan-200 dark:border-cyan-800/60 bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg hover:scale-[1.01] transition-all">
+                    <div class="text-[10px] font-black uppercase tracking-[0.24em] opacity-80">Live</div>
+                    <div class="mt-3 text-2xl font-black">Reports</div>
+                    <div class="mt-2 text-xs opacity-85">Citizen service requests</div>
+                </button>
+                <button type="button" class="gov-need-card group rounded-2xl p-4 text-left border border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg hover:scale-[1.01] transition-all">
+                    <div class="text-[10px] font-black uppercase tracking-[0.24em] opacity-80">Live</div>
+                    <div class="mt-3 text-2xl font-black">Incidents</div>
+                    <div class="mt-2 text-xs opacity-85">Emergency events & alerts</div>
+                </button>
+                <button type="button" class="gov-need-card group rounded-2xl p-4 text-left border border-amber-200 dark:border-amber-800/60 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg hover:scale-[1.01] transition-all">
+                    <div class="text-[10px] font-black uppercase tracking-[0.24em] opacity-80">Sync</div>
+                    <div class="mt-3 text-2xl font-black">Records</div>
+                    <div class="mt-2 text-xs opacity-85">Centralized state data</div>
+                </button>
+                <button type="button" class="gov-need-card group rounded-2xl p-4 text-left border border-rose-200 dark:border-rose-800/60 bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg hover:scale-[1.01] transition-all">
+                    <div class="text-[10px] font-black uppercase tracking-[0.24em] opacity-80">Storage</div>
+                    <div class="mt-3 text-2xl font-black">Firestore</div>
+                    <div class="mt-2 text-xs opacity-85">Database - Firebase</div>
+                </button>
+            </div>
+            <div class="mt-4 text-xs font-mono uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400 text-right">
+                Stored at Firestore [ Database - Firebase ]
+            </div>
+        </section>
+
+        <section class="glass-panel rounded-2xl p-5 animate-enter">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500">DEMO OPERATIONS VIEW</span>
+                    <h2 class="text-2xl font-black uppercase tracking-tight">City Health</h2>
+                </div>
+                <button id="simulate-incident" type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest rounded-lg btn-glow">Simulate City Incident</button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="rounded-xl bg-emerald-500/10 p-3"><div class="text-[9px] uppercase font-black text-slate-500">Overall City Health</div><div class="text-2xl font-black text-emerald-500">87%</div></div>
+                <div class="rounded-xl bg-blue-500/10 p-3"><div class="text-[9px] uppercase font-black text-slate-500">Roads</div><div class="text-xl font-black text-blue-500">91%</div></div>
+                <div class="rounded-xl bg-amber-500/10 p-3"><div class="text-[9px] uppercase font-black text-slate-500">Streetlights</div><div class="text-xl font-black text-amber-500">84%</div></div>
+                <div class="rounded-xl bg-violet-500/10 p-3"><div class="text-[9px] uppercase font-black text-slate-500">Drainage / Infrastructure</div><div class="text-xl font-black text-violet-500">86%</div></div>
+            </div>
+            <div id="demo-incidents" class="mt-4 hidden rounded-xl border border-rose-300/50 bg-rose-50/60 dark:bg-rose-950/20 p-3 text-xs"></div>
+            <p class="mt-3 text-[9px] font-mono uppercase tracking-widest text-slate-400">Demo/calculated indicators only — not official statistics.</p>
+        </section>
+        
+        <div class="animate-enter">
+            <div class="border-b border-slate-300 dark:border-slate-800 pb-2 mb-6 flex justify-between items-end">
+                <div>
+                    <h2 class="text-2xl font-black uppercase tracking-tight drop-shadow-sm">Active Triage</h2>
+                    <p class="text-xs text-slate-500 font-mono mt-1">Assign open citizen complaints to Workers 1, 2, 3, or 4.</p>
+                </div>
+                <div class="hidden md:block text-right">
+                    <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest animate-pulse">Live Sync Active</span>
+                </div>
+            </div>
+            <div id="grid-open" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="col-span-full text-center py-10 text-slate-500 font-mono text-sm animate-pulse">FETCHING MUNICIPAL DATA...</div>
+            </div>
+        </div>
+
+        <div class="animate-enter delay-200">
+            <div class="border-b border-slate-300 dark:border-slate-800 pb-2 mb-6 mt-10">
+                <h2 class="text-2xl font-black uppercase tracking-tight text-green-600 dark:text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.2)]">Completed Works</h2>
+                <p class="text-xs text-slate-500 font-mono mt-1">Issues fixed by laborers. Review and delete from Firebase.</p>
+            </div>
+            <div id="grid-completed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
+                </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7UBfwYAz5gIdXRGcs5Jl0WP6pPm9RXKM",
+            authDomain: "citadel-gov.firebaseapp.com",
+            projectId: "citadel-gov",
+            storageBucket: "citadel-gov.firebasestorage.app",
+            messagingSenderId: "312225425822",
+            appId: "1:312225425822:web:cccf5db07b42f7d0210e8f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.toggleTheme = function() {
+            document.documentElement.classList.toggle('dark');
+            document.getElementById('icon-sun').classList.toggle('hidden');
+            document.getElementById('icon-moon').classList.toggle('hidden');
+        }
+
+        const gridOpen = document.getElementById('grid-open');
+        const gridCompleted = document.getElementById('grid-completed');
+       
+        const q = query(collection(db, "reports"), orderBy("upvotes", "desc"));
+
+        onSnapshot(q, (snapshot) => {
+            gridOpen.innerHTML = '';
+            gridCompleted.innerHTML = '';
+            let openCount = 0; let compCount = 0;
+            let openDelay = 0; let compDelay = 0;
+
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const postId = docSnap.id;
+                const trackingId = data.trackingId || `CIT-${new Date().getFullYear()}-${postId.slice(-6).toUpperCase()}`;
+                const statusIndex = data.status === 'ASSIGNED' ? 2 : data.status === 'COMPLETED' ? 4 : 1;
+                const timeline = ['REPORTED', 'VERIFIED', 'ASSIGNED', 'REPAIRING', 'RESOLVED'].map((stage, i) => `<span class="text-[8px] font-black ${i <= statusIndex ? 'text-emerald-500' : 'text-slate-400'}">${stage}</span>`).join('<span class="text-slate-300">→</span>');
+
+                // 1. RENDER OPEN TASKS
+                if (data.status === 'OPEN') {
+                    openCount++;
+                    openDelay++;
+                    let dClass = openDelay > 5 ? 'delay-400' : `delay-${openDelay * 100}`;
+
+                    const card = `
+                        <div class="glass-panel rounded-xl overflow-hidden animate-enter ${dClass}">
+                            <img src="${data.imageUrl}" class="w-full h-40 object-cover opacity-90" alt="Issue Image">
+                            <div class="p-4 flex-1 flex flex-col justify-between">
+                                <div class="mb-4">
+                                    <p class="text-[9px] font-mono text-blue-500 mb-2">TRACKING ID: ${trackingId}</p>
+                                    <div class="flex flex-wrap gap-1 mb-3">${timeline}</div>
+                                    <span class="text-[10px] text-amber-500 font-bold bg-amber-50 dark:bg-amber-900/30 px-2 py-1 rounded shadow-sm border border-amber-200 dark:border-amber-800/50">▲ ${data.upvotes} UPVOTES</span>
+                                    <p class="text-[10px] font-mono text-slate-500 mt-3 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                        ${data.location}
+                                    </p>
+                                    <p class="text-sm font-medium mt-2 leading-snug">${data.desc}</p>
+                                </div>
+                                <div class="flex gap-2 border-t border-slate-200 dark:border-slate-800/50 pt-3 mt-2">
+                                    <select id="worker-select-${postId}" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs rounded-lg p-2 flex-1 outline-none font-bold transition-colors">
+                                        <option value="1">Worker 1</option>
+                                        <option value="2">Worker 2</option>
+                                        <option value="3">Worker 3</option>
+                                        <option value="4">Worker 4</option>
+                                    </select>
+                                    <button onclick="assignTask('${postId}')" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs px-4 rounded-lg uppercase tracking-wider btn-glow glow-blue transition-all">Dispatch</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    gridOpen.innerHTML += card;
+                }
+
+                // 2. RENDER COMPLETED TASKS
+                if (data.status === 'COMPLETED') {
+                    compCount++;
+                    compDelay++;
+                    let dClass = compDelay > 5 ? 'delay-400' : `delay-${compDelay * 100}`;
+                   
+                    const displayImage = data.fixedImageUrl ? data.fixedImageUrl : data.imageUrl;
+
+                    const compCard = `
+                        <div class="glass-panel border-2 border-green-400/50 dark:border-green-600/50 rounded-xl overflow-hidden animate-enter ${dClass}">
+                            <div class="bg-green-100/80 dark:bg-green-900/40 p-2 text-center text-[10px] font-black text-green-700 dark:text-green-400 uppercase tracking-widest backdrop-blur-sm">
+                                RESOLVED BY WORKER ${data.assignedTo}
+                            </div>
+                           
+                            <div class="grid grid-cols-2 gap-1 bg-green-950/10">
+                                <div><div class="text-[8px] font-black text-center text-slate-500 py-1">BEFORE</div><img src="${data.imageUrl}" class="w-full h-28 object-cover" alt="Citizen report before repair"></div>
+                                <div><div class="text-[8px] font-black text-center text-emerald-500 py-1">AFTER</div><img src="${displayImage}" class="w-full h-28 object-cover" alt="Worker repair after"></div>
+                            </div>
+                           
+                            <div class="p-4 flex flex-col items-center">
+                                <p class="text-[10px] text-green-600 dark:text-green-400 font-bold mb-3 text-center uppercase tracking-widest w-full">Visual Evidence Verified</p>
+                                <button onclick="deleteRecord('${postId}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-black text-xs px-3 py-2.5 rounded-lg uppercase tracking-widest transition-colors btn-glow glow-red">
+                                    Permanently Delete
+                                </button>
+                            </div>
+                        </div>`;
+                    gridCompleted.innerHTML += compCard;
+                }
+            });
+
+            if (openCount === 0) gridOpen.innerHTML = `<div class="col-span-full py-10 text-slate-400 text-sm font-mono text-center">NO OPEN ISSUES. GRID STABLE.</div>`;
+            if (compCount === 0) gridCompleted.innerHTML = `<div class="col-span-full py-10 text-slate-400 text-sm font-mono text-center">NO COMPLETED FIXES TO REVIEW.</div>`;
+        });
+
+        window.assignTask = async function(postId) {
+            const workerId = document.getElementById(`worker-select-${postId}`).value;
+            await updateDoc(doc(db, "reports", postId), {
+                status: 'ASSIGNED',
+                assignedTo: workerId
+            });
+        };
+
+        window.deleteRecord = async function(postId) {
+            const confirmDelete = confirm("Are you sure you want to permanently delete this resolved issue from Firebase?");
+            if(confirmDelete) {
+                await deleteDoc(doc(db, "reports", postId));
+            }
+        };
+
+        document.getElementById('simulate-incident').addEventListener('click', () => {
+            const incidentBox = document.getElementById('demo-incidents');
+            incidentBox.classList.remove('hidden');
+            incidentBox.innerHTML = `<div class="font-black uppercase tracking-widest text-rose-600 mb-2">DEMO INCIDENTS — LOCAL ONLY</div><div class="grid grid-cols-2 gap-2">${['Pothole', 'Broken Streetlight', 'Blocked Drain', 'Damaged Manhole'].map((item) => `<div class="rounded-lg bg-white/70 dark:bg-slate-900/60 p-2 font-bold">${item}<span class="block text-[9px] font-normal text-slate-500">Awaiting verification</span></div>`).join('')}</div>`;
+        });
+    </script>
+    <script type="module">
+        import { toggleVisionCommand } from './vision-command/vision-command.js';
+        const toggleButton = document.getElementById('vc-toggle');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', async () => {
+                const enabled = await toggleVisionCommand();
+                toggleButton.textContent = enabled ? 'Disable Vision Command' : 'Vision Command';
+            });
+        }
+    </script>
+</body>
+</html>

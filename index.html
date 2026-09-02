@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITADEL | Secure Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./vision-command/vision-ui.css">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans flex justify-center items-center min-h-screen transition-theme matrix-bg overflow-hidden p-4">
+
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="glass-panel max-w-md w-full p-8 rounded-2xl shadow-2xl relative z-10 animate-enter border-t border-white/20 dark:border-slate-700/50">
+       
+        <button onclick="document.documentElement.classList.toggle('dark')" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-amber-500 transition-colors">
+            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        </button>
+
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black tracking-tighter text-red-600 dark:text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.3)]">CITADEL</h1>
+            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mt-1">Civic Operations Node</p>
+        </div>
+
+        <div class="flex justify-between bg-slate-200 dark:bg-slate-900/50 p-1 rounded-lg mb-8 shadow-inner border border-slate-300 dark:border-slate-800">
+            <button id="tab-citizen" onclick="switchRole('citizen')" ... >Citizen</button>
+            <button id="tab-official" onclick="switchRole('official')" ... >Official</button>
+            <button id="tab-worker" onclick="switchRole('worker')" ... >Worker</button>
+            <button id="tab-ngo" onclick="switchRole('ngo')" ... >NGO</button>
+        </div>
+
+        <div id="panel-intake" class="space-y-4 animate-enter delay-100">
+            <div class="space-y-1.5">
+                <label class="text-[10px] uppercase font-black text-slate-500 tracking-widest">Full Name</label>
+                <input type="text" id="input-name" placeholder="E.g., Aditya Desai" class="w-full bg-white/50 dark:bg-black/40 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-3 transition-colors backdrop-blur-sm">
+            </div>
+           
+            <div class="space-y-1.5">
+                <label class="text-[10px] uppercase font-black text-slate-500 tracking-widest">Email Node</label>
+                <input type="email" id="input-email" placeholder="citizen@node.com" class="w-full bg-white/50 dark:bg-black/40 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-3 transition-colors backdrop-blur-sm">
+            </div>
+           
+            <div id="worker-id-container" class="relative mt-4 hidden animate-enter">
+                <label class="text-[10px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest block mb-1 drop-shadow-[0_0_5px_rgba(245,158,11,0.2)]">Field Worker ID</label>
+                                <select id="input-worker-id" class="w-full bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 text-slate-900 dark:text-amber-500 text-sm font-bold rounded-lg focus:ring-amber-500 focus:border-amber-500 block p-3 transition-colors backdrop-blur-sm">
+                    <option value="1">Worker Unit 1 (Alpha)</option>
+                    <option value="2">Worker Unit 2 (Beta)</option>
+                    <option value="3">Worker Unit 3 (Gamma)</option>
+                    <option value="4">Worker Unit 4 (Delta)</option>
+                </select>
+                <button onclick="initQrScanner()" class="w-full mt-3 bg-amber-600 hover:bg-amber-700 text-white text-[9px] font-black py-2 rounded uppercase tracking-widest transition-all">
+                    Scan Worker QR ID
+                </button>
+            </div>
+
+            <div id="panel-qr-scanner" class="hidden animate-enter">
+                <div class="relative w-full h-56 bg-black rounded-xl overflow-hidden border-2 border-slate-700">
+                    <video id="qr-video" class="absolute inset-0 w-full h-full object-cover"></video>
+                    <div id="qr-demo-status" class="absolute inset-0 flex items-center justify-center text-center p-6 text-white text-xs font-black uppercase tracking-widest"></div>
+                </div>
+                <button onclick="cancelQrScanner()" class="w-full mt-3 text-slate-500 text-[10px] uppercase font-black">Cancel Scan</button>
+            </div>
+
+
+            <button onclick="executeOtpGeneration()" class="w-full mt-4 text-white bg-red-600 hover:bg-red-700 font-black rounded-lg text-xs px-5 py-3.5 uppercase tracking-widest transition-all btn-glow glow-red shadow-lg border border-red-500/50">
+                Initialize Connection
+            </button>
+        </div>
+
+        <div id="panel-otp" class="hidden space-y-4 animate-enter">
+            <div class="text-center p-4 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg backdrop-blur-sm">
+                <p class="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-2">Secure Handshake</p>
+                <p class="text-[9px] font-mono text-blue-600 dark:text-blue-400" id="debug-otp-value">TRANSMITTING...</p>
+            </div>
+            <input type="text" id="input-otp-entry" placeholder="6-DIGIT CODE" class="w-full bg-white/50 dark:bg-black/40 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-center text-lg tracking-[0.5em] font-black rounded-lg focus:ring-red-500 focus:border-red-500 block p-3 transition-colors">
+           
+            <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500 font-mono">LINK DECAY: <span id="otp-timer" class="text-red-500 font-black">02:00</span></span>
+            </div>
+            <p id="otp-error-msg" class="text-red-500 text-[10px] font-black uppercase text-center hidden">Invalid Code Signature.</p>
+           
+            <button onclick="verifyOtpToken()" class="w-full text-white bg-slate-900 dark:bg-white dark:text-slate-900 font-black rounded-lg text-xs px-5 py-3.5 uppercase tracking-widest transition-all btn-glow shadow-md">
+                Verify & Continue
+            </button>
+        </div>
+
+        <div id="panel-biometric" class="hidden animate-enter">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Biometric Uplink</span>
+                <span id="matrix-status-tag" class="text-[9px] font-black text-amber-500 uppercase tracking-widest animate-pulse">CONNECTING</span>
+            </div>
+           
+            <div class="relative w-full h-56 bg-black rounded-xl overflow-hidden border-2 border-slate-700 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+                <div id="camera-fallback" class="absolute inset-0 flex items-center justify-center flex-col z-0 opacity-50">
+                    <svg class="w-12 h-12 text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                    <span class="text-[9px] text-slate-500 font-mono tracking-widest">AWAITING CAMERA OVERRIDE</span>
+                </div>
+               
+                <video id="webcam-feed" class="absolute inset-0 w-full h-full object-cover z-10" autoplay playsinline></video>
+                <canvas id="matrix-overlay" class="absolute inset-0 w-full h-full z-20 pointer-events-none"></canvas>
+               
+                                <div id="laser-bar" class="absolute top-0 left-0 w-full h-1 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,1)] z-30 hidden animate-[scan_2s_ease-in-out_infinite]"></div>
+            </div>
+
+            <button id="btn-demo" onclick="executeDemoBypass()" class="w-full mt-2 text-[8px] bg-slate-800 text-slate-400 py-1 rounded hover:bg-slate-700 transition-colors uppercase tracking-widest">
+                Use Demo Bypass
+            </button>
+           
+            <div class="mt-4 p-3 bg-slate-900 rounded-lg border border-slate-700 min-h-[60px] flex items-center justify-center">
+                <p id="ai-directive-text" class="text-xs font-bold text-slate-400 text-center uppercase tracking-widest">INITIALIZING HARDWARE...</p>
+            </div>
+           
+            <p id="camera-error-text" class="text-red-500 text-[10px] font-black uppercase text-center mt-2 hidden">Grant camera permissions to proceed.</p>
+
+            <button id="btn-execute-challenge" onclick="advanceBiometricChallenge()" class="w-full mt-4 text-white bg-green-600 hover:bg-green-700 font-black rounded-lg text-xs px-5 py-3.5 uppercase tracking-widest transition-all hidden btn-glow glow-emerald shadow-lg border border-green-500/50">
+                Execute Verification
+            </button>
+        </div>
+
+        <div id="panel-admin" class="hidden space-y-4 animate-enter">
+            <div class="p-4 bg-slate-100/50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg text-center backdrop-blur-sm">
+                <svg class="w-8 h-8 mx-auto text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <p class="text-[10px] uppercase font-black text-slate-600 dark:text-slate-400 tracking-widest">Restricted Sub-Network</p>
+                <p class="text-xs text-slate-500 mt-1 font-mono">Enter administrative clearance key.</p>
+            </div>
+           
+            <input type="password" id="input-admin-pass" placeholder="••••••••" class="w-full bg-white/50 dark:bg-black/40 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-center text-lg tracking-[0.5em] font-black rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 transition-colors">
+            
+            <p id="admin-error-text" class="text-red-500 text-[10px] font-black uppercase text-center hidden">Access Denied. Invalid Key.</p>
+            
+            <button onclick="validateAdminClearanceKey()" class="w-full text-white bg-blue-600 hover:bg-blue-700 font-black rounded-lg text-xs px-5 py-3.5 uppercase tracking-widest transition-all btn-glow glow-blue shadow-lg border border-blue-500/50">
+                Authenticate
+            </button>
+        </div>
+
+  
+    </div>
+
+    <style>
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+
+    <script type="module" src="js.js"></script>
+</body>
+</html>

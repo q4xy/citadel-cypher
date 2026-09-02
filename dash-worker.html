@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITADEL | Field Worker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans flex justify-center min-h-screen transition-theme matrix-bg">
+
+    <div class="max-w-md w-full relative flex flex-col h-screen overflow-hidden border-x border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white/40 dark:bg-zinc-900/40">
+       
+        <header class="glass-panel p-4 flex justify-between items-center shadow-md z-20 sticky top-0 border-b border-amber-500/30">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-amber-500 text-black rounded-lg flex items-center justify-center font-black shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <h1 class="text-xl font-black tracking-tighter text-amber-600 dark:text-amber-500 drop-shadow-[0_0_5px_rgba(245,158,11,0.3)]">LABOR<span class="text-zinc-900 dark:text-white text-lg">OPS</span></h1>
+            </div>
+            <a href="index.html" class="px-3 py-1.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[10px] font-black uppercase tracking-widest rounded transition-colors btn-glow glow-amber shadow-md">Sign Out</a>
+        </header>
+
+        <div class="bg-zinc-100 dark:bg-zinc-900/80 backdrop-blur-md p-4 border-b border-zinc-200 dark:border-zinc-800 z-10 shadow-inner space-y-3">
+            <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 block">Active Worker Unit:</label>
+            <select id="current-worker-id" onchange="window.refreshWorkerFeed()" class="w-full bg-white dark:bg-black border border-zinc-300 dark:border-zinc-700 text-amber-600 dark:text-amber-500 text-sm font-bold rounded-lg p-2.5 outline-none focus:border-amber-500 transition-colors shadow-sm">
+                <option value="1">Unit 1 (Alpha)</option>
+                <option value="2">Unit 2 (Beta)</option>
+                <option value="3">Unit 3 (Gamma)</option>
+                <option value="4">Unit 4 (Delta)</option>
+            </select>
+            <div class="flex items-center justify-between gap-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30 p-3">
+                <div>
+                    <div class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400">Location</div>
+                    <div id="worker-location-text" class="text-[11px] text-zinc-600 dark:text-zinc-300 mt-1">Current location not shared yet</div>
+                </div>
+                <button id="location-btn" type="button" class="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-black text-[9px] font-black uppercase tracking-[0.18em] rounded-lg shadow-md">Use my location</button>
+            </div>
+        </div>
+
+        <div id="tasks-container" class="flex-1 overflow-y-auto p-4 space-y-5 pb-10">
+            </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7UBfwYAz5gIdXRGcs5Jl0WP6pPm9RXKM",
+            authDomain: "citadel-gov.firebaseapp.com",
+            projectId: "citadel-gov",
+            storageBucket: "citadel-gov.firebasestorage.app",
+            messagingSenderId: "312225425822",
+            appId: "1:312225425822:web:cccf5db07b42f7d0210e8f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const tasksContainer = document.getElementById('tasks-container');
+        const workerLocationText = document.getElementById('worker-location-text');
+        const locationBtn = document.getElementById('location-btn');
+        const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
+        
+        let allTasks = [];
+        let workerLocation = null;
+
+        function toRadians(value) {
+            return (value * Math.PI) / 180;
+        }
+
+        function getDistanceMeters(lat1, lon1, lat2, lon2) {
+            const earthRadius = 6371000;
+            const dLat = toRadians(lat2 - lat1);
+            const dLon = toRadians(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return earthRadius * c;
+        }
+
+        function formatDistance(distanceMeters) {
+            if (!Number.isFinite(distanceMeters)) return 'Distance unavailable';
+            if (distanceMeters < 1000) return `${Math.round(distanceMeters)} m away`;
+            return `${(distanceMeters / 1000).toFixed(1)} km away`;
+        }
+
+        function parseCoordinates(task) {
+            const locationText = typeof task.location === 'string' ? task.location : '';
+            const stringNumbers = (locationText.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+            const stringLatMatch = locationText.match(/(-?\d+(?:\.\d+)?)\s*(?:°\s*)?(N|S)/i);
+            const stringLngMatch = locationText.match(/(-?\d+(?:\.\d+)?)\s*(?:°\s*)?(E|W)/i);
+
+            const candidates = [
+                task.latitude,
+                task.lat,
+                task.locationLat,
+                task.latitudeCoordinate,
+                task.coords && task.coords.latitude,
+                task.location && task.location.latitude,
+            ];
+            const lngCandidates = [
+                task.longitude,
+                task.lng,
+                task.locationLng,
+                task.longitudeCoordinate,
+                task.coords && task.coords.longitude,
+                task.location && task.location.longitude,
+            ];
+
+            let lat = Number(candidates.find((value) => value !== undefined && value !== null && !Number.isNaN(Number(value))));
+            let lng = Number(lngCandidates.find((value) => value !== undefined && value !== null && !Number.isNaN(Number(value))));
+
+            if (stringNumbers.length >= 2) {
+                lat = stringNumbers[0];
+                lng = stringNumbers[1];
+            }
+
+            if (stringLatMatch) {
+                lat = Number(stringLatMatch[1]);
+                if (/S/i.test(stringLatMatch[2])) lat *= -1;
+            }
+
+            if (stringLngMatch) {
+                lng = Number(stringLngMatch[1]);
+                if (/W/i.test(stringLngMatch[2])) lng *= -1;
+            }
+
+            if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                return { latitude: lat, longitude: lng };
+            }
+
+            return null;
+        }
+
+        function addLocationListener() {
+            if (!navigator.geolocation) {
+                workerLocationText.textContent = 'Geolocation is not supported on this device';
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    workerLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    };
+                    workerLocationText.textContent = `Current location: ${workerLocation.latitude.toFixed(5)}, ${workerLocation.longitude.toFixed(5)}`;
+                    if (typeof window.refreshWorkerFeed === 'function') {
+                        window.refreshWorkerFeed();
+                    }
+                },
+                () => {
+                    workerLocationText.textContent = 'Location access denied. Enable it to see distance to each task.';
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+            );
+        }
+
+        locationBtn.addEventListener('click', () => {
+            addLocationListener();
+            if (typeof window.refreshWorkerFeed === 'function') {
+                window.refreshWorkerFeed();
+            }
+        });
+
+        // Auto-select the worker ID if they logged in properly
+        const savedWorkerId = sessionStorage.getItem('citadel_worker_id');
+        if(savedWorkerId) {
+            document.getElementById('current-worker-id').value = savedWorkerId;
+        }
+
+        addLocationListener();
+
+        onSnapshot(q, (snapshot) => {
+            allTasks = [];
+            snapshot.forEach((docSnap) => {
+                allTasks.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            window.refreshWorkerFeed();
+        });
+
+        window.refreshWorkerFeed = function() {
+            const activeId = document.getElementById('current-worker-id').value;
+            tasksContainer.innerHTML = '';
+            let myTasks = 0;
+            let delayCounter = 0; // Animation Timer
+
+            allTasks.forEach((task) => {
+                if((task.status === 'ASSIGNED' || task.status === 'REPAIRING') && task.assignedTo === activeId) {
+                    myTasks++;
+                    delayCounter++;
+                    let delayClass = delayCounter > 5 ? 'delay-400' : `delay-${delayCounter * 100}`;
+
+                    const coordinates = parseCoordinates(task);
+                    const trackingId = task.trackingId || `CIT-${new Date().getFullYear()}-${task.id.slice(-6).toUpperCase()}`;
+                    const statusIndex = task.status === 'REPAIRING' ? 3 : 2;
+                    const locationText = task.location || 'Location unavailable';
+                    let distanceText = 'Distance unavailable';
+                    if (workerLocation && coordinates) {
+                        const distanceMeters = getDistanceMeters(workerLocation.latitude, workerLocation.longitude, coordinates.latitude, coordinates.longitude);
+                        distanceText = formatDistance(distanceMeters);
+                    }
+
+                    const taskHTML = `
+                        <div class="glass-panel rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden animate-enter ${delayClass}">
+                            <div class="bg-amber-100/80 dark:bg-amber-900/30 p-3 border-b border-amber-200 dark:border-amber-800/50 flex justify-between items-center backdrop-blur-sm">
+                                <span class="text-[10px] font-black text-amber-700 dark:text-amber-500 uppercase tracking-widest flex items-center gap-1">
+                                    <span class="relative flex h-2 w-2 mr-1">
+                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                      <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                    </span>
+                                    PENDING
+                                </span>
+                                <span class="text-[9px] font-mono text-zinc-500 dark:text-zinc-400">${distanceText}</span>
+                            </div>
+                            
+                            <img src="${task.imageUrl}" class="w-full h-32 object-cover opacity-80 grayscale" alt="Initial Issue">
+                            
+                            <div class="p-4 space-y-3">
+                                <div class="flex items-center justify-between"><span class="text-[9px] font-mono text-blue-500">TRACKING ID: ${trackingId}</span><span class="text-[9px] font-black text-amber-600 uppercase">${task.status || 'ASSIGNED'}</span></div>
+                                <div class="flex flex-wrap gap-1 text-[8px] font-black">${['REPORTED', 'VERIFIED', 'ASSIGNED', 'REPAIRING', 'RESOLVED'].map((stage, index) => `<span class="${index <= statusIndex ? 'text-emerald-500' : 'text-zinc-400'}">${stage}${index < 4 ? ' →' : ''}</span>`).join('')}</div>
+                                <div class="rounded-lg border border-zinc-200 dark:border-zinc-800/50 bg-white/50 dark:bg-black/50 p-3">
+                                    <div class="text-[9px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">Location</div>
+                                    <div class="mt-1 text-sm font-semibold text-zinc-800 dark:text-zinc-200">${locationText}</div>
+                                </div>
+                                <div class="rounded-lg border border-zinc-200 dark:border-zinc-800/50 bg-white/50 dark:bg-black/50 p-3">
+                                    <div class="text-[9px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">Coordinates</div>
+                                    <div class="mt-1 text-xs font-mono text-zinc-700 dark:text-zinc-300">${coordinates ? `${coordinates.latitude.toFixed(6)}, ${coordinates.longitude.toFixed(6)}` : 'Lat/Long not available yet'}</div>
+                                </div>
+                                <p class="text-xs text-zinc-800 dark:text-zinc-200 font-medium leading-relaxed bg-white/50 dark:bg-black/50 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800/50">${task.desc}</p>
+                                
+                                <div class="flex gap-2">
+                                    <button onclick="startTask('${task.id}')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-black uppercase tracking-widest py-3.5 rounded-lg transition-all btn-glow">Start</button>
+                                    <button onclick="document.getElementById('file-${task.id}').click()" class="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[10px] font-black uppercase tracking-widest py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all btn-glow shadow-md">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                                        Snap Repair
+                                    </button>
+                                   
+                                    <input type="file" id="file-${task.id}" accept="image/*" capture="environment" class="hidden" onchange="enableResolution('${task.id}')">
+                                   
+                                    <button id="resolve-${task.id}" onclick="markCompleted('${task.id}')" disabled class="flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-400 text-[10px] font-black uppercase tracking-widest py-3.5 rounded-lg disabled:opacity-50 transition-all border border-transparent">
+                                        Verify Fix
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    tasksContainer.innerHTML += taskHTML;
+                }
+            });
+
+            if(myTasks === 0) {
+                tasksContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 opacity-40 animate-enter">
+                        <svg class="w-16 h-16 text-zinc-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-zinc-500 font-black text-xs uppercase tracking-widest">No pending dispatches for Unit ${activeId}</p>
+                    </div>`;
+            }
+        }
+
+        window.enableResolution = function(id) {
+            const btn = document.getElementById(`resolve-${id}`);
+            btn.disabled = false;
+            // Upgrades to glowing green button when a photo is uploaded
+            btn.className = "flex-1 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest py-3.5 rounded-lg transition-all btn-glow glow-emerald shadow-lg border border-green-500/50 cursor-pointer";
+        }
+
+        window.startTask = async function(id) {
+            await updateDoc(doc(db, "reports", id), { status: 'REPAIRING' });
+        };
+
+        window.markCompleted = async function(id) {
+            const btn = document.getElementById(`resolve-${id}`);
+            btn.innerHTML = `<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>`;
+            btn.disabled = true;
+           
+            const fileInput = document.getElementById(`file-${id}`);
+            const file = fileInput.files[0];
+
+            if (!file) {
+                try { await updateDoc(doc(db, "reports", id), { status: 'COMPLETED' }); }
+                catch (e) { console.error("Error resolving: ", e); }
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                   
+                    canvas.width = 400;
+                    canvas.height = (400 * img.height) / img.width;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const compressedImageString = canvas.toDataURL('image/jpeg', 0.5);
+
+                    try {
+                        await updateDoc(doc(db, "reports", id), {
+                            status: 'COMPLETED',
+                            fixedImageUrl: compressedImageString
+                        });
+                    } catch (e) {
+                        alert("Upload failed. Try a smaller image.");
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    </script>
+</body>
+</html>
