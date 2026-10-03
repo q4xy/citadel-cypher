@@ -4,7 +4,16 @@ import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/fir
 
 async function recordSuccessfulLogin(name, role) {
     if (!auth.currentUser) {
-        await signInAnonymously(auth);
+        try {
+            await signInAnonymously(auth);
+        } catch (error) {
+            const code = error?.code || "unknown";
+            const message = error?.message || "No additional details were provided.";
+            throw new Error(
+                `Firebase Anonymous Authentication failed (${code}): ${message} ` +
+                "Check that Anonymous sign-in is enabled in Firebase Console."
+            );
+        }
     }
 
     await Promise.race([

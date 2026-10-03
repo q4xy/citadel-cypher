@@ -1,4 +1,4 @@
-const CACHE_NAME = 'citadel-cache-v3';
+const CACHE_NAME = 'citadel-cache-v4';
 const urlsToCache = [
   '/index.html',
   '/style.css',
@@ -14,6 +14,9 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        return self.skipWaiting();
       })
   );
 });
@@ -39,7 +42,7 @@ self.addEventListener('activate', (event) => {
             return caches.delete(cacheName);
           }
         })
-      );
+      ).then(() => self.clients.claim());
     })
   );
 });
