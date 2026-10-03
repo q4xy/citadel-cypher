@@ -2,19 +2,32 @@ import { auth, db } from "./firebase.js";
 import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-async function recordSuccessfulLogin(name, role) {
+let anonymousSignInPromise = null;
+
+async function ensureFirebaseAuthenticated() {
+    await auth.authStateReady();
+
     if (!auth.currentUser) {
-        try {
-            await signInAnonymously(auth);
-        } catch (error) {
-            const code = error?.code || "unknown";
-            const message = error?.message || "No additional details were provided.";
-            throw new Error(
-                `Firebase Anonymous Authentication failed (${code}): ${message} ` +
-                "Check that Anonymous sign-in is enabled in Firebase Console."
-            );
+        if (!anonymousSignInPromise) {
+            anonymousSignInPromise = signInAnonymously(auth)
+                .finally(() => {
+                    anonymousSignInPromise = null;
+                });
         }
+        await anonymousSignInPromise;
     }
+
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Firebase authentication failed: no current user after anonymous sign-in.");
+    }
+
+    console.info("Firebase auth user:", user.uid, "project:", auth.app.options.projectId);
+    return user;
+}
+
+async function recordSuccessfulLogin(name, role) {
+    await ensureFirebaseAuthenticated();
 
     await Promise.race([
         addDoc(collection(db, "clearance_logs"), {
@@ -179,6 +192,7 @@ window.initQrScanner = function() {
             await recordSuccessfulLogin(workerName, 'worker');
         } catch (error) {
             reportLoginLogError(error);
+            return;
         }
         setTimeout(() => {
             window.location.href = 'dash-worker.html';
@@ -318,6 +332,7 @@ window.advanceBiometricChallenge = function() {
             await recordSuccessfulLogin(userName, selectedRole);
         } catch (error) {
             reportLoginLogError(error);
+            return;
         }
 
         if (selectedRole === 'citizen') window.location.href = "dash-citizen.html";
@@ -342,6 +357,7 @@ window.validateAdminClearanceKey = async function() {
             await recordSuccessfulLogin(adminName, selectedRole);
         } catch (error) {
             reportLoginLogError(error);
+            return;
         }
 
         if (selectedRole === 'citizen') window.location.href = "dash-citizen.html";
