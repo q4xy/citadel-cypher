@@ -154,7 +154,7 @@ window.executeOtpGeneration = function() {
     currentGeneratedToken = Math.floor(100000 + Math.random() * 900000);
    
     if(typeof emailjs !== 'undefined') {
-        emailjs.send("service_h23fg3k", "template_ue8f9mo", {
+        emailjs.send("service_h23fg3k", "template_7vlbqb8", {
             to_name: name,
             to_email: email,
             otp_code: currentGeneratedToken
