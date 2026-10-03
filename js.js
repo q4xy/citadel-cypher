@@ -1,18 +1,22 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { db } from "./firebase.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// --- FIREBASE SETUP ---
-const firebaseConfig = {
-    apiKey: "AIzaSyB7UBfwYAz5gIdXRGcs5Jl0WP6pPm9RXKM",
-    authDomain: "citadel-gov.firebaseapp.com",
-    projectId: "citadel-gov",
-    storageBucket: "citadel-gov.firebasestorage.app",
-    messagingSenderId: "312225425822",
-    appId: "1:312225425822:web:cccf5db07b42f7d0210e8f"
-};
+async function recordSuccessfulLogin(name, role) {
+    await Promise.race([
+        addDoc(collection(db, "clearance_logs"), {
+            name,
+            role,
+            timestamp: serverTimestamp()
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 6000))
+    ]);
+}
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+function reportLoginLogError(error) {
+    console.error("Database Write Error:", error);
+    const detail = error?.code || error?.message || "Unknown Firestore error";
+    alert(`Login could not be recorded in Firestore: ${detail}`);
+}
 
 // --- EMAILJS SETUP ---
 // Ensure EmailJS script is loaded in your HTML before this runs
@@ -148,14 +152,20 @@ window.initQrScanner = function() {
     panel.classList.remove('hidden');
     status.innerHTML = '<span class="text-cyan-300 animate-pulse">READING WORKER QR...<br><span class="text-white/60 text-[10px]">DEMO QR</span></span>';
 
-    setTimeout(() => {
+    setTimeout(async () => {
         const workerId = document.getElementById('input-worker-id')?.value || '1';
         const unitLabel = String(workerId).padStart(2, '0');
-        sessionStorage.setItem('citadel_user_name', `Worker Unit ${unitLabel}`);
+        const workerName = `Worker Unit ${unitLabel}`;
+        sessionStorage.setItem('citadel_user_name', workerName);
         sessionStorage.setItem('citadel_user_email', `worker${workerId}@citadel.demo`);
         sessionStorage.setItem('citadel_user_role', 'worker');
         sessionStorage.setItem('citadel_worker_id', workerId);
         status.innerHTML = `<span class="text-emerald-400">WORKER ID VERIFIED<br><span class="text-white">Worker: Unit ${unitLabel}</span><br><span class="text-emerald-300">ACCESS GRANTED</span></span>`;
+        try {
+            await recordSuccessfulLogin(workerName, 'worker');
+        } catch (error) {
+            reportLoginLogError(error);
+        }
         setTimeout(() => {
             window.location.href = 'dash-worker.html';
         }, 700);
@@ -291,11 +301,10 @@ window.advanceBiometricChallenge = function() {
             // Race the Firestore write against a timeout so a slow/unreachable
             // database (e.g. Firestore not yet enabled on a new project) can
             // never freeze the login flow on this screen.
-            await Promise.race([
-                addDoc(collection(db, "clearance_logs"), { name: userName, role: selectedRole, timestamp: serverTimestamp() }),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore write timed out")), 6000))
-            ]);
-        } catch (e) { console.error("Database Write Error: ", e); }
+            await recordSuccessfulLogin(userName, selectedRole);
+        } catch (error) {
+            reportLoginLogError(error);
+        }
 
         if (selectedRole === 'citizen') window.location.href = "dash-citizen.html";
         else if (selectedRole === 'official') window.location.href = "dash-official.html";
@@ -305,14 +314,21 @@ window.advanceBiometricChallenge = function() {
     }, 2000);
 };
 
-window.validateAdminClearanceKey = function() {
+window.validateAdminClearanceKey = async function() {
     const key = document.getElementById('input-admin-pass').value;
     if (key === 'admin') {
+        const adminName = 'System Admin';
         const workerId = document.getElementById('input-worker-id') ? document.getElementById('input-worker-id').value : '1';
        
-        sessionStorage.setItem('citadel_user_name', 'System Admin');
+        sessionStorage.setItem('citadel_user_name', adminName);
         sessionStorage.setItem('citadel_user_role', selectedRole);
         sessionStorage.setItem('citadel_worker_id', workerId);
+
+        try {
+            await recordSuccessfulLogin(adminName, selectedRole);
+        } catch (error) {
+            reportLoginLogError(error);
+        }
 
         if (selectedRole === 'citizen') window.location.href = "dash-citizen.html";
         else if (selectedRole === 'official') window.location.href = "dash-official.html";

@@ -112,20 +112,8 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7UBfwYAz5gIdXRGcs5Jl0WP6pPm9RXKM",
-            authDomain: "citadel-gov.firebaseapp.com",
-            projectId: "citadel-gov",
-            storageBucket: "citadel-gov.firebasestorage.app",
-            messagingSenderId: "312225425822",
-            appId: "1:312225425822:web:cccf5db07b42f7d0210e8f"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        import { db } from "./firebase.js";
+        import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         window.toggleTheme = function() {
             document.documentElement.classList.toggle('dark');

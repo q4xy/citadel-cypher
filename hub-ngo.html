@@ -56,21 +56,8 @@
 
     <!-- FIREBASE & LOGIC -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        // Your exact Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyB7UBfwYAz5gIdXRGcs5Jl0WP6pPm9RXKM",
-            authDomain: "citadel-gov.firebaseapp.com",
-            projectId: "citadel-gov",
-            storageBucket: "citadel-gov.firebasestorage.app",
-            messagingSenderId: "312225425822",
-            appId: "1:312225425822:web:cccf5db07b42f7d0210e8f"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        import { db } from "./firebase.js";
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // Event Listener for dynamically handling the "Request to Join" buttons
         document.addEventListener('click', async (e) => {
