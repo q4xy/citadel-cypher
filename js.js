@@ -1,7 +1,12 @@
-import { db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
+import { signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 async function recordSuccessfulLogin(name, role) {
+    if (!auth.currentUser) {
+        await signInAnonymously(auth);
+    }
+
     await Promise.race([
         addDoc(collection(db, "clearance_logs"), {
             name,

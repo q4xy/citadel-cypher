@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /clearance_logs/{logId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(['name', 'role', 'timestamp'])
+        && request.resource.data.keys().hasOnly(['name', 'role', 'timestamp'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.role in ['citizen', 'official', 'worker', 'ngo']
+        && request.resource.data.timestamp == request.time;
+
+      allow read, update, delete: if false;
+    }
+  }
+}
