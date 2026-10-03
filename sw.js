@@ -1,4 +1,4 @@
-const CACHE_NAME = 'citadel-cache-v4';
+const CACHE_NAME = 'citadel-cache-v5';
 const urlsToCache = [
   '/index.html',
   '/style.css',
